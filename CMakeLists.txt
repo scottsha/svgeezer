@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #include_directories(cmake)
-include(cmake/conan.cmake)
+include(conan.cmake)
 conan_cmake_run(CONANFILE conanfile.py
         BASIC_SETUP CMAKE_TARGETS
         BUILD missing
