@@ -1,21 +1,67 @@
-//
-// Created by scott on 1/19/21.
-//
+#include "boost/filesystem.hpp"
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
+#include "simple_svg_1.0.0.hpp"
 
 #include <iostream>
 #include <fstream>
 
 using namespace cv;
 using namespace std;
+
+svg::Polyline svg_tri(Vec6f coords, Vec3f color){
+    svg::Polyline poly(svg::Fill(svg::Color(color[0], color[1], color[2])));
+    for (auto foo=0; foo<3; foo++){
+        poly << svg::Point(coords[2 * foo], coords[2 * foo + 1]);
+    }
+    return poly;
+};
+
+Vec4f get_triangles_bounding_box(vector<Vec6f> triangleList) {
+    float xlo = std::numeric_limits<float>::max();
+    float xhi = std::numeric_limits<float>::lowest();
+    float ylo = std::numeric_limits<float>::max();
+    float yhi = std::numeric_limits<float>::lowest();
+    for (const auto& tri : triangleList) {
+        for (auto foo=0; foo<3; foo++){
+            xlo = min(tri[2 * foo], xlo);
+            xhi = max(tri[2 * foo], xhi);
+            ylo = min(tri[2 * foo+1], ylo);
+            yhi = max(tri[2 * foo+1], yhi);
+        }
+    }
+    return {xlo, ylo, xhi, yhi};
+}
+
+void write_triangle_svg(boost::filesystem::path fout, vector<Vec6f> triangleList, vector<Vec3f> colors) {
+    auto bb = get_triangles_bounding_box(triangleList);
+    float width = bb[2] - bb[0];
+    float height = bb[3] - bb[1];
+    svg::Dimensions dimensions(width, height);
+    svg::Document doc(fout.string(), svg::Layout(dimensions, svg::Layout::TopLeft));
+//    doc.setTranslate(-bb[0], 0);
+    for (auto foo=0; foo< triangleList.size(); foo++){
+        const auto& tri = triangleList[foo];
+        const auto& col = colors[foo];
+        doc << svg_tri(tri, col);
+    }
+    doc.save();
+}
+
+void example_write_trisvg(){
+    std::vector<Vec6f> coords = {{0,0, 0,100, 100,0},
+                                 {0,0, 0,-100,-100,0},
+                                 {0,100, 100,0 ,100,100}};
+    std::vector<Vec3f> colors = {{255,0,0},
+                                 {0,255,0},
+                                 {0, 0, 255}};
+    write_triangle_svg("trialtri.svg", coords, colors);
+}
+
 
 // Draw a single point
 static void draw_point( Mat& img, Point2f fp, Scalar color )
@@ -199,5 +245,7 @@ int sorolla_example(){
 
 int main()
 {
-    return obama_delaunay();
+    example_write_trisvg();
+//    obama_delaunay();
+    return 0;
 }

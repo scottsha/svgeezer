@@ -618,7 +618,11 @@ namespace svg
                 << attribute("width", layout.dimensions.width, "px")
                 << attribute("height", layout.dimensions.height, "px")
                 << attribute("xmlns", "http://www.w3.org/2000/svg")
-                << attribute("version", "1.1") << ">\n" << body_nodes_str << elemEnd("svg");
+                << attribute("version", "1.1") << ">\n"
+                << "<g transform=\"translate("<< global_translate_x_ << "," << global_translate_y_ << ")\">" << std::endl
+                << body_nodes_str
+                << elemEnd("g")
+                << elemEnd("svg");
             return ss.str();
         }
         bool save() const
@@ -631,11 +635,18 @@ namespace svg
             ofs.close();
             return true;
         }
+
+        void setTranslate(float x, float y){
+            global_translate_x_ = x;
+            global_translate_y_ = y;
+        }
     private:
         std::string file_name;
         Layout layout;
 
         std::string body_nodes_str;
+        float global_translate_x_ = 0;
+        float global_translate_y_ = 0;
     };
 }
 

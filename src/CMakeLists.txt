@@ -12,6 +12,7 @@ add_executable(tinker
 		)
 target_link_libraries(tinker PUBLIC
 		CONAN_PKG::opencv
+		CONAN_PKG::boost
 		)
 
 # target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/lib")
